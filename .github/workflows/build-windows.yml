@@ -24,7 +24,7 @@ jobs:
 
       - name: Build portable application
         run: |
-          pyinstaller --noconfirm --clean --windowed --name ARJSOFT-HEIC-Converter --collect-all pillow_heif main.py
+          pyinstaller --noconfirm --clean --windowed --name ARJSOFT-HEIC-Converter --collect-all pillow_heif --add-data "assets/arjsoft-logo.jpg;assets" main.py
 
       - name: Install Inno Setup
         run: choco install innosetup --yes --no-progress

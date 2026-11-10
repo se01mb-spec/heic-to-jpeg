@@ -1,0 +1,30 @@
+name: Build Windows app
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Build standalone executable
+        run: |
+          pyinstaller --noconfirm --clean --windowed --name HEIC-to-JPEG --collect-all pillow_heif main.py
+      - name: Upload executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: HEIC-to-JPEG-Windows
+          path: dist/HEIC-to-JPEG/
+          if-no-files-found: error

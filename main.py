@@ -4,8 +4,8 @@ from pathlib import Path
 
 from PIL import Image, ImageOps
 from pillow_heif import register_heif_opener
-from PySide2.QtCore import Qt, QThread, Signal
-from PySide2.QtGui import QPixmap, QIcon
+from PySide2.QtCore import Qt, QThread, Signal, QUrl
+from PySide2.QtGui import QPixmap, QIcon, QDesktopServices
 from PySide2.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QLabel, QListWidget, QFileDialog, QProgressBar,
@@ -78,7 +78,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle(APP_NAME)
-        self.setWindowIcon(QIcon(resource_path("assets/arjsoft-logo.jpg")))
+        self.setWindowIcon(QIcon(resource_path("assets/arjsoft-icon.ico")))
         self.resize(840, 640)
         self.files = []
         self.output_dir = str(Path.home() / "Pictures" / "JPEG")
@@ -96,7 +96,7 @@ class MainWindow(QMainWindow):
         self.logo = QLabel()
         self.logo.setObjectName("brandLogo")
         self.logo.setToolTip(APP_NAME)
-        logo_pixmap = QPixmap(resource_path("assets/arjsoft-logo.jpg"))
+        logo_pixmap = QPixmap(resource_path("assets/arjsoft-logo.png"))
         if not logo_pixmap.isNull():
             self.logo.setPixmap(logo_pixmap.scaledToHeight(66, Qt.SmoothTransformation))
         else:
@@ -164,6 +164,15 @@ class MainWindow(QMainWindow):
         self.convert_button.clicked.connect(self.start_conversion)
         layout.addWidget(self.convert_button)
 
+        self.about_group = QGroupBox()
+        about_layout = QVBoxLayout(self.about_group)
+        self.about_description = QLabel()
+        self.about_description.setWordWrap(True)
+        self.about_description.setTextFormat(Qt.RichText)
+        self.about_description.setOpenExternalLinks(True)
+        about_layout.addWidget(self.about_description)
+        layout.addWidget(self.about_group)
+
         self.footer = QLabel("ARJSOFT  •  Version " + APP_VERSION)
         self.footer.setObjectName("footer")
         self.footer.setAlignment(Qt.AlignCenter)
@@ -198,6 +207,12 @@ class MainWindow(QMainWindow):
                       "افزودن عکس‌ها", "افزودن پوشه", "حذف انتخاب‌شده",
                       "پاک کردن فهرست", "کیفیت JPEG:", "حفظ اطلاعات عکس (EXIF)",
                       "پوشه خروجی:", "انتخاب پوشه", "شروع تبدیل")
+            self.about_group.setTitle("درباره ARJSOFT")
+            self.about_description.setText(
+                "ARJSOFT با هدف ساخت نرم‌افزارهای کاربردی، ساده و قابل‌اعتماد فعالیت می‌کند. "
+                "این برنامه یکی از محصولات نرم‌افزاری ARJSOFT است و تبدیل تصاویر را به‌صورت "
+                "آفلاین و روی رایانه شما انجام می‌دهد.<br><a href='https://arjsoft.ir'>"
+                "وب‌سایت رسمی: arjsoft.ir</a>")
             self.status.setText("تعداد تصاویر: {}".format(len(self.files)))
         else:
             self.setLayoutDirection(Qt.LeftToRight)
@@ -205,6 +220,12 @@ class MainWindow(QMainWindow):
                       "Add Photos", "Add Folder", "Remove Selected", "Clear List",
                       "JPEG quality:", "Preserve photo metadata (EXIF)",
                       "Output folder:", "Browse", "Convert to JPEG")
+            self.about_group.setTitle("About ARJSOFT")
+            self.about_description.setText(
+                "ARJSOFT creates practical, simple and reliable software. This app is part "
+                "of the ARJSOFT software collection and converts your photos locally, "
+                "without uploading them to an online service.<br><a href='https://arjsoft.ir'>"
+                "Official website: arjsoft.ir</a>")
             self.status.setText("{} image(s) in queue".format(len(self.files)))
         widgets = (self.language_button, self.subtitle, self.add_files_button,
                    self.add_folder_button, self.remove_button, self.clear_button,

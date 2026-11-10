@@ -4,7 +4,7 @@
 #define MyAppExeName "ARJSOFT-HEIC-Converter.exe"
 
 [Setup]
-AppId={{A9B54F10-2E6D-4A3D-9D31-ARJHEIC10001}
+AppId={{A9B54F10-2E6D-4A3D-9D31-A9A1E1C10001}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}

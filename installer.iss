@@ -15,6 +15,7 @@ OutputBaseFilename=ARJSOFT-HEIC-Converter-Setup
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
+SetupIconFile=assets\\arjsoft-icon.ico
 ArchitecturesInstallIn64BitMode=x64
 UninstallDisplayName={#MyAppName}
 

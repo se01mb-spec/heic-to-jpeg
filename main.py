@@ -9,7 +9,7 @@ from PySide2.QtGui import QPixmap, QIcon, QDesktopServices
 from PySide2.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QLabel, QListWidget, QFileDialog, QProgressBar,
-    QSpinBox, QGroupBox, QMessageBox, QCheckBox, QAbstractItemView
+    QSpinBox, QGroupBox, QMessageBox, QCheckBox, QAbstractItemView, QDialog
 )
 
 APP_NAME = "ARJSOFT HEIC Converter"
@@ -93,15 +93,20 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(24, 20, 24, 16)
         layout.setSpacing(14)
         header = QHBoxLayout()
-        self.logo = QLabel()
-        self.logo.setObjectName("brandLogo")
-        self.logo.setToolTip(APP_NAME)
+        self.logo_button = QPushButton()
+        self.logo_button.setObjectName("brandLogoButton")
+        self.logo_button.setFlat(True)
+        self.logo_button.setCursor(Qt.PointingHandCursor)
+        self.logo_button.setToolTip("About ARJSOFT")
         logo_pixmap = QPixmap(resource_path("assets/arjsoft-logo.png"))
         if not logo_pixmap.isNull():
-            self.logo.setPixmap(logo_pixmap.scaledToHeight(66, Qt.SmoothTransformation))
+            self.logo_button.setIcon(QIcon(logo_pixmap))
+            self.logo_button.setIconSize(logo_pixmap.size().scaled(230, 66, Qt.KeepAspectRatio))
+            self.logo_button.setFixedSize(240, 74)
         else:
-            self.logo.setText(APP_NAME)
-        header.addWidget(self.logo)
+            self.logo_button.setText("ARJSOFT")
+        self.logo_button.clicked.connect(self.show_about)
+        header.addWidget(self.logo_button)
         header.addStretch()
         self.language_button = QPushButton("فارسی")
         self.language_button.clicked.connect(self.toggle_language)
@@ -164,14 +169,7 @@ class MainWindow(QMainWindow):
         self.convert_button.clicked.connect(self.start_conversion)
         layout.addWidget(self.convert_button)
 
-        self.about_group = QGroupBox()
-        about_layout = QVBoxLayout(self.about_group)
-        self.about_description = QLabel()
-        self.about_description.setWordWrap(True)
-        self.about_description.setTextFormat(Qt.RichText)
-        self.about_description.setOpenExternalLinks(True)
-        about_layout.addWidget(self.about_description)
-        layout.addWidget(self.about_group)
+        self.about_dialog = None
 
         self.footer = QLabel("ARJSOFT  •  Version " + APP_VERSION)
         self.footer.setObjectName("footer")
@@ -182,7 +180,8 @@ class MainWindow(QMainWindow):
         self.setStyleSheet("""
             QMainWindow, QWidget { background: #f5f7fa; color: #243447;
                 font-family: 'Segoe UI'; font-size: 10pt; }
-            QLabel#brandLogo { background: transparent; padding: 2px; }
+            QPushButton#brandLogoButton { background: transparent; border: 0; padding: 2px; }
+            QPushButton#brandLogoButton:hover { background: #ffffff; border-radius: 8px; }
             QLabel#subtitle { color: #718096; }
             QLabel#footer { color: #8795a4; font-size: 8pt; padding-top: 4px; }
             QPushButton { background: white; border: 1px solid #d8e0e8;
@@ -207,12 +206,8 @@ class MainWindow(QMainWindow):
                       "افزودن عکس‌ها", "افزودن پوشه", "حذف انتخاب‌شده",
                       "پاک کردن فهرست", "کیفیت JPEG:", "حفظ اطلاعات عکس (EXIF)",
                       "پوشه خروجی:", "انتخاب پوشه", "شروع تبدیل")
-            self.about_group.setTitle("درباره ARJSOFT")
-            self.about_description.setText(
-                "ARJSOFT با هدف ساخت نرم‌افزارهای کاربردی، ساده و قابل‌اعتماد فعالیت می‌کند. "
-                "این برنامه یکی از محصولات نرم‌افزاری ARJSOFT است و تبدیل تصاویر را به‌صورت "
-                "آفلاین و روی رایانه شما انجام می‌دهد.<br><a href='https://arjsoft.ir'>"
-                "وب‌سایت رسمی: arjsoft.ir</a>")
+            self.logo_button.setToolTip("درباره ARJSOFT")
+            self.update_about_dialog_text()
             self.status.setText("تعداد تصاویر: {}".format(len(self.files)))
         else:
             self.setLayoutDirection(Qt.LeftToRight)
@@ -220,12 +215,8 @@ class MainWindow(QMainWindow):
                       "Add Photos", "Add Folder", "Remove Selected", "Clear List",
                       "JPEG quality:", "Preserve photo metadata (EXIF)",
                       "Output folder:", "Browse", "Convert to JPEG")
-            self.about_group.setTitle("About ARJSOFT")
-            self.about_description.setText(
-                "ARJSOFT creates practical, simple and reliable software. This app is part "
-                "of the ARJSOFT software collection and converts your photos locally, "
-                "without uploading them to an online service.<br><a href='https://arjsoft.ir'>"
-                "Official website: arjsoft.ir</a>")
+            self.logo_button.setToolTip("About ARJSOFT")
+            self.update_about_dialog_text()
             self.status.setText("{} image(s) in queue".format(len(self.files)))
         widgets = (self.language_button, self.subtitle, self.add_files_button,
                    self.add_folder_button, self.remove_button, self.clear_button,
@@ -233,6 +224,79 @@ class MainWindow(QMainWindow):
                    self.output_button, self.convert_button)
         for widget, value in zip(widgets, values):
             widget.setText(value)
+
+    def update_about_dialog_text(self):
+        if self.about_dialog is None:
+            return
+        if self.persian:
+            self.about_dialog.setWindowTitle("درباره ARJSOFT")
+            self.about_heading.setText("نرم‌افزارهای کاربردی، ساده و قابل‌اعتماد")
+            self.about_description.setText(
+                "ARJSOFT با هدف طراحی و ارائه نرم‌افزارهای کاربردی و آسان برای استفاده فعالیت می‌کند. "
+                "این برنامه یکی از محصولات ARJSOFT است و تبدیل تصاویر شما را به‌صورت آفلاین "
+                "و مستقیماً روی رایانه انجام می‌دهد.")
+            self.about_website.setText("<a href='https://arjsoft.ir'>مشاهده وب‌سایت رسمی ARJSOFT</a>")
+            self.about_close.setText("بستن")
+        else:
+            self.about_dialog.setWindowTitle("About ARJSOFT")
+            self.about_heading.setText("Practical, simple and reliable software")
+            self.about_description.setText(
+                "ARJSOFT creates practical software that is simple to use and reliable. "
+                "This app is part of the ARJSOFT collection and converts your photos offline, "
+                "directly on your computer.")
+            self.about_website.setText("<a href='https://arjsoft.ir'>Visit the official ARJSOFT website</a>")
+            self.about_close.setText("Close")
+
+    def show_about(self):
+        if self.about_dialog is None:
+            self.about_dialog = QDialog(self)
+            self.about_dialog.setWindowFlags(Qt.Dialog | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
+            self.about_dialog.setWindowIcon(QIcon(resource_path("assets/arjsoft-icon.ico")))
+            self.about_dialog.setFixedWidth(410)
+            dialog_layout = QVBoxLayout(self.about_dialog)
+            dialog_layout.setContentsMargins(28, 24, 28, 22)
+            dialog_layout.setSpacing(14)
+
+            mark = QLabel()
+            mark.setAlignment(Qt.AlignCenter)
+            pixmap = QPixmap(resource_path("assets/arjsoft-logo.png"))
+            if not pixmap.isNull():
+                mark.setPixmap(pixmap.scaledToHeight(76, Qt.SmoothTransformation))
+            dialog_layout.addWidget(mark)
+
+            self.about_heading = QLabel()
+            self.about_heading.setObjectName("aboutHeading")
+            self.about_heading.setAlignment(Qt.AlignCenter)
+            self.about_heading.setWordWrap(True)
+            dialog_layout.addWidget(self.about_heading)
+
+            self.about_description = QLabel()
+            self.about_description.setWordWrap(True)
+            self.about_description.setAlignment(Qt.AlignCenter)
+            dialog_layout.addWidget(self.about_description)
+
+            self.about_website = QLabel()
+            self.about_website.setTextFormat(Qt.RichText)
+            self.about_website.setOpenExternalLinks(True)
+            self.about_website.setAlignment(Qt.AlignCenter)
+            dialog_layout.addWidget(self.about_website)
+
+            self.about_close = QPushButton()
+            self.about_close.setObjectName("aboutClose")
+            self.about_close.clicked.connect(self.about_dialog.hide)
+            dialog_layout.addWidget(self.about_close)
+            self.about_dialog.setStyleSheet("""
+                QDialog { background: #ffffff; color: #243447; }
+                QLabel#aboutHeading { color: #324d62; font-size: 13pt; font-weight: 700; }
+                QLabel { font-family: 'Segoe UI'; font-size: 10pt; }
+                QPushButton#aboutClose { background: #324d62; color: white;
+                    border: 0; border-radius: 8px; padding: 10px; font-weight: 600; }
+                QPushButton#aboutClose:hover { background: #243f55; }
+            """)
+        self.update_about_dialog_text()
+        self.about_dialog.show()
+        self.about_dialog.raise_()
+        self.about_dialog.activateWindow()
 
     def toggle_language(self):
         self.persian = not self.persian

@@ -5,6 +5,7 @@ from pathlib import Path
 from PIL import Image, ImageOps
 from pillow_heif import register_heif_opener
 from PySide2.QtCore import Qt, QThread, Signal
+from PySide2.QtGui import QPixmap, QIcon
 from PySide2.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QLabel, QListWidget, QFileDialog, QProgressBar,
@@ -14,6 +15,14 @@ from PySide2.QtWidgets import (
 APP_NAME = "ARJSOFT HEIC Converter"
 APP_VERSION = "1.0.0"
 SUPPORTED = {".heic", ".heif"}
+
+
+def resource_path(relative_path):
+    """Resolve bundled assets in both source and PyInstaller builds."""
+    base_path = getattr(sys, "_MEIPASS", str(Path(__file__).resolve().parent))
+    return str(Path(base_path) / relative_path)
+
+
 register_heif_opener()
 
 
@@ -69,6 +78,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle(APP_NAME)
+        self.setWindowIcon(QIcon(resource_path("assets/arjsoft-logo.jpg")))
         self.resize(840, 640)
         self.files = []
         self.output_dir = str(Path.home() / "Pictures" / "JPEG")
@@ -83,9 +93,15 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(24, 20, 24, 16)
         layout.setSpacing(14)
         header = QHBoxLayout()
-        self.title = QLabel(APP_NAME)
-        self.title.setObjectName("title")
-        header.addWidget(self.title)
+        self.logo = QLabel()
+        self.logo.setObjectName("brandLogo")
+        self.logo.setToolTip(APP_NAME)
+        logo_pixmap = QPixmap(resource_path("assets/arjsoft-logo.jpg"))
+        if not logo_pixmap.isNull():
+            self.logo.setPixmap(logo_pixmap.scaledToHeight(66, Qt.SmoothTransformation))
+        else:
+            self.logo.setText(APP_NAME)
+        header.addWidget(self.logo)
         header.addStretch()
         self.language_button = QPushButton("فارسی")
         self.language_button.clicked.connect(self.toggle_language)
@@ -157,7 +173,7 @@ class MainWindow(QMainWindow):
         self.setStyleSheet("""
             QMainWindow, QWidget { background: #f5f7fa; color: #243447;
                 font-family: 'Segoe UI'; font-size: 10pt; }
-            QLabel#title { color: #324d62; font-size: 21pt; font-weight: 700; }
+            QLabel#brandLogo { background: transparent; padding: 2px; }
             QLabel#subtitle { color: #718096; }
             QLabel#footer { color: #8795a4; font-size: 8pt; padding-top: 4px; }
             QPushButton { background: white; border: 1px solid #d8e0e8;

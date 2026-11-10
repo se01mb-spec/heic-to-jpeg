@@ -11,7 +11,8 @@ from PySide2.QtWidgets import (
     QSpinBox, QGroupBox, QMessageBox, QCheckBox, QAbstractItemView
 )
 
-APP_NAME = "ARJSOFT HEIC to JPEG"
+APP_NAME = "ARJSOFT HEIC Converter"
+APP_VERSION = "1.0.0"
 SUPPORTED = {".heic", ".heif"}
 register_heif_opener()
 
@@ -68,7 +69,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle(APP_NAME)
-        self.resize(840, 610)
+        self.resize(840, 640)
         self.files = []
         self.output_dir = str(Path.home() / "Pictures" / "JPEG")
         self.worker = None
@@ -79,7 +80,7 @@ class MainWindow(QMainWindow):
     def build_ui(self):
         root = QWidget()
         layout = QVBoxLayout(root)
-        layout.setContentsMargins(24, 20, 24, 20)
+        layout.setContentsMargins(24, 20, 24, 16)
         layout.setSpacing(14)
         header = QHBoxLayout()
         self.title = QLabel(APP_NAME)
@@ -146,15 +147,22 @@ class MainWindow(QMainWindow):
         self.convert_button.setObjectName("convert")
         self.convert_button.clicked.connect(self.start_conversion)
         layout.addWidget(self.convert_button)
+
+        self.footer = QLabel("ARJSOFT  •  Version " + APP_VERSION)
+        self.footer.setObjectName("footer")
+        self.footer.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self.footer)
+
         self.setCentralWidget(root)
         self.setStyleSheet("""
             QMainWindow, QWidget { background: #f5f7fa; color: #243447;
                 font-family: 'Segoe UI'; font-size: 10pt; }
-            QLabel#title { color: #243f55; font-size: 21pt; font-weight: 700; }
+            QLabel#title { color: #324d62; font-size: 21pt; font-weight: 700; }
             QLabel#subtitle { color: #718096; }
+            QLabel#footer { color: #8795a4; font-size: 8pt; padding-top: 4px; }
             QPushButton { background: white; border: 1px solid #d8e0e8;
                 border-radius: 8px; padding: 10px 14px; }
-            QPushButton:hover { border-color: #e0ad24; background: #fffaf0; }
+            QPushButton:hover { border-color: #edc726; background: #fffaf0; }
             QPushButton#convert { background: #324d62; color: white;
                 font-weight: 700; padding: 14px; font-size: 11pt; }
             QPushButton#convert:hover { background: #243f55; }
@@ -182,15 +190,11 @@ class MainWindow(QMainWindow):
                       "JPEG quality:", "Preserve photo metadata (EXIF)",
                       "Output folder:", "Browse", "Convert to JPEG")
             self.status.setText("{} image(s) in queue".format(len(self.files)))
-        (self.language_button, self.subtitle, self.add_files_button,
-         self.add_folder_button, self.remove_button, self.clear_button,
-         self.quality_label, self.metadata, self.output_label,
-         self.output_button, self.convert_button)
-        for widget, value in zip(
-            (self.language_button, self.subtitle, self.add_files_button,
-             self.add_folder_button, self.remove_button, self.clear_button,
-             self.quality_label, self.metadata, self.output_label,
-             self.output_button, self.convert_button), values):
+        widgets = (self.language_button, self.subtitle, self.add_files_button,
+                   self.add_folder_button, self.remove_button, self.clear_button,
+                   self.quality_label, self.metadata, self.output_label,
+                   self.output_button, self.convert_button)
+        for widget, value in zip(widgets, values):
             widget.setText(value)
 
     def toggle_language(self):

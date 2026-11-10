@@ -13,6 +13,9 @@ ARJSOFT HEIC Converter is the first desktop utility in the ARJSOFT software coll
 - Preserve EXIF metadata and embedded color profile when available
 - Correct image orientation automatically
 - Progress indicator and per-file error reporting
+- Automatically opens the destination folder when conversion finishes
+- High-resolution ARJSOFT branding and a custom Windows application icon
+- Built-in About section with a link to the official ARJSOFT website
 - Persian and English interface
 - Offline conversion; photos remain on your computer
 
@@ -46,6 +49,8 @@ The current build targets 64-bit Windows 10 and Windows 11. Windows 7 is not sup
 - Publisher: ARJSOFT
 - Version: 1.0.0
 - Website: https://arjsoft.ir
+
+The application includes an About section with a direct link to the official website.
 
 ## License
 

@@ -1,4 +1,4 @@
-name: Build Windows app
+name: Build ARJSOFT HEIC Converter
 
 on:
   push:
@@ -11,20 +11,33 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.8'
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: Build standalone executable
+
+      - name: Build portable application
         run: |
-          pyinstaller --noconfirm --clean --windowed --name HEIC-to-JPEG --collect-all pillow_heif main.py
-      - name: Upload executable
+          pyinstaller --noconfirm --clean --windowed --name ARJSOFT-HEIC-Converter --collect-all pillow_heif main.py
+
+      - name: Install Inno Setup
+        run: choco install innosetup --yes --no-progress
+
+      - name: Build Windows installer
+        run: |
+          & "C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe" installer.iss
+
+      - name: Upload portable app and installer
         uses: actions/upload-artifact@v4
         with:
-          name: HEIC-to-JPEG-Windows
-          path: dist/HEIC-to-JPEG/
+          name: ARJSOFT-HEIC-Converter-Windows
+          path: |
+            dist/ARJSOFT-HEIC-Converter/
+            dist/ARJSOFT-HEIC-Converter-Setup.exe
           if-no-files-found: error

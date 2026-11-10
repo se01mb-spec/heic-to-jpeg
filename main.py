@@ -286,6 +286,8 @@ class MainWindow(QMainWindow):
                    if not self.persian else "موفق: {}    ناموفق: {}".format(success, failed))
         QMessageBox.information(self, APP_NAME, summary + "\n\n" + details[:5000])
         self.status.setText(summary)
+        if success > 0 and Path(self.output_dir).exists():
+            QDesktopServices.openUrl(QUrl.fromLocalFile(self.output_dir))
 
 
 def main():
